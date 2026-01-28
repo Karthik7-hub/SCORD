@@ -1,0 +1,348 @@
+/* =========================================
+   PART 4: DASHBOARD & PAGES (dashboard.css)
+   ========================================= */
+
+/* --- 1. LAYOUT & SCROLLING (Fixed PC Hiding) --- */
+.scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    padding-bottom: 120px;
+}
+
+/* THE FIX: Make Wizard Scrollable & Padded */
+.wizard-container {
+    flex: 1;
+    height: 100%;
+    /* Occupy full height */
+    overflow-y: auto;
+    /* Allow scrolling */
+    padding: 24px;
+    padding-bottom: 100px;
+    /* Space for bottom button */
+    display: flex;
+    flex-direction: column;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.wizard-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-shrink: 0;
+}
+
+.wizard-title {
+    margin: 0 0 0 12px;
+    font-size: 1.8rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+/* Inputs */
+.input-group {
+    margin-bottom: 24px;
+    flex-shrink: 0;
+}
+
+.input-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    margin-left: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.input-field {
+    width: 100%;
+    padding: 18px;
+    border-radius: 16px;
+    border: 1px solid transparent;
+    background: var(--glass-input);
+    box-shadow: inset 0 0 0 1px var(--glass-border);
+    color: var(--text-main);
+    font-size: 1.1rem;
+    outline: none;
+    transition: 0.2s;
+}
+
+.input-field:focus {
+    background: var(--glass-input);
+    box-shadow: inset 0 0 0 2px var(--primary);
+}
+
+/* --- 2. BETTER TOGGLES (High Contrast) --- */
+.toggle-row {
+    display: flex;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 4px;
+    border-radius: 14px;
+    margin-bottom: 20px;
+    width: 100%;
+    border: 1px solid var(--glass-border);
+}
+
+.toggle-opt {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.toggle-opt.active {
+    background: var(--glass-card);
+    color: #fff;
+    /* Force white text */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Light Mode Toggle Fix */
+[data-theme="light"] .toggle-row {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .toggle-opt.active {
+    color: #000;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+
+
+/* --- 4. CARDS & LISTS --- */
+.glass-card {
+    background: var(--glass-card);
+    backdrop-filter: var(--glass-frosted);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    margin-bottom: 16px;
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-card);
+    transition: transform 0.2s;
+}
+
+.glass-card:active {
+    transform: scale(0.98);
+}
+
+/* --- 5. ACTION BUTTONS --- */
+.btn-action {
+    width: 100%;
+    padding: 20px;
+    background: var(--glass-card);
+    backdrop-filter: var(--glass-frosted);
+    border-radius: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    margin-bottom: 12px;
+    color: var(--text-main);
+    font-weight: 600;
+    font-size: 1.05rem;
+    border: 1px solid var(--glass-border);
+    transition: background 0.2s;
+}
+
+.btn-action:active {
+    background: var(--glass-input);
+}
+
+[data-theme="light"] .btn-action {
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* --- 6. FLOATING ACTION BUTTON (FAB) --- */
+.fab-btn {
+    position: absolute;
+    bottom: 30px;
+    right: 24px;
+    width: 64px;
+    height: 64px;
+    border-radius: 24px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    box-shadow: 0 12px 30px rgba(10, 132, 255, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 40;
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.fab-btn:active {
+    transform: scale(0.9);
+}
+
+/* --- 7. MATCH RESULT & TOSS VISIBILITY --- */
+.card-footer {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--glass-border);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+}
+
+.toss-badge {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-style: italic;
+    opacity: 0.8;
+}
+
+.result-badge {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: linear-gradient(90deg, rgba(255, 214, 10, 0.15), rgba(255, 214, 10, 0.05));
+    border: 1px solid rgba(255, 214, 10, 0.3);
+    color: #FFD60A;
+    /* Hardcoded Gold */
+    font-size: 0.95rem;
+    font-weight: 700;
+    padding: 10px;
+    border-radius: 12px;
+    position: relative;
+    z-index: 2;
+}
+
+[data-theme="light"] .result-badge {
+    background: rgba(255, 214, 10, 0.1);
+    border: 1px solid rgba(255, 214, 10, 0.5);
+    color: #D97706;
+}
+
+/* =========================================
+   PREMIUM 3D COIN (Fixed Physics & No Glitches)
+   ========================================= */
+#coinContainer {
+    perspective: 1200px;
+    width: 150px;
+    height: 150px;
+    margin: 20px auto 50px;
+    position: relative;
+    z-index: 10;
+}
+
+/* Ground Shadow */
+#coinContainer::after {
+    content: "";
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    width: 100px;
+    height: 16px;
+    background: radial-gradient(ellipse, rgba(0, 0, 0, 0.4), transparent 70%);
+    transform: translateX(-50%);
+    filter: blur(8px);
+    z-index: 0;
+}
+
+#coin {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 3.5s cubic-bezier(0.15, 1, 0.3, 1);
+}
+
+/* --- SHARED FACE STYLES --- */
+.coin-face {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    backface-visibility: hidden;
+    /* Critical: Hides the back when flipped */
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.6rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+
+    /* Solid background prevents "see-through" glitches */
+    background-color: #000;
+}
+
+/* --- HEADS (Gold) --- */
+.coin-face.heads {
+    /* Pushed forward by 4px */
+    transform: translateZ(4px);
+
+    background:
+        radial-gradient(circle at 30% 30%, #FFF5C3, transparent 40%),
+        linear-gradient(135deg, #FFD700, #E6AC00);
+
+    color: #754d00;
+    border: 4px solid #FFE066;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+
+    /* Inner shine */
+    box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.5);
+}
+
+/* --- TAILS (Silver) --- */
+.coin-face.tails {
+    /* Rotated and Pushed "forward" (which is back relative to center) */
+    transform: rotateX(180deg) translateZ(4px);
+
+    background:
+        radial-gradient(circle at 70% 70%, #FFFFFF, transparent 40%),
+        linear-gradient(135deg, #E0E1E6, #A0A4B0);
+
+    color: #475569;
+    border: 4px solid #F0F2F5;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+
+    /* Inner shine */
+    box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.5);
+}
+
+/* --- THE FILLER (The Meat in the Sandwich) --- */
+/* This replaces the glitchy rim. It's a solid cylinder in the middle. */
+#coin::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+
+    /* Sits exactly in the middle (Z=0) */
+    transform: translateZ(0);
+
+    /* Dark grey edge color */
+    background: #888;
+
+    /* This creates the visual "thickness" from the side */
+    box-shadow:
+        0 0 2px 3px #A0A0A0,
+        /* The Rim Edge */
+        0 0 10px rgba(0, 0, 0, 0.5);
+    /* Drop Shadow */
+
+    /* Slightly smaller so it doesn't leak out the front */
+    width: 98%;
+    height: 98%;
+    left: 1%;
+    top: 1%;
+}

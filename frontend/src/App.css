@@ -1,0 +1,768 @@
+/* =========================================
+   1. THEME ENGINE (Variables)
+   ========================================= */
+:root {
+  /* --- DARK MODE (Default - OLED) --- */
+  --app-bg: #000000;
+
+  /* Glass Surfaces */
+  --glass-nav: rgba(20, 20, 20, 0.75);
+  --glass-card: rgba(28, 28, 30, 0.65);
+  --glass-modal: rgba(30, 30, 32, 0.85);
+  --glass-input: rgba(255, 255, 255, 0.1);
+  --glass-pill: rgba(118, 118, 128, 0.24);
+
+  /* The Magic Frost Effect */
+  --glass-frosted: blur(28px) saturate(180%);
+
+  /* Borders & Depth */
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-shine: rgba(255, 255, 255, 0.05);
+
+  /* Shadows */
+  --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --shadow-float: 0 10px 40px rgba(0, 0, 0, 0.6);
+  --shadow-text: 0 2px 4px rgba(0, 0, 0, 0.5);
+
+  /* Keypad */
+  --key-bg: rgba(255, 255, 255, 0.14);
+  --key-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
+  --key-inset: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+  /* Text & Colors */
+  --text-main: #FFFFFF;
+  --text-muted: #98989D;
+
+  --primary: #0A84FF;
+  /* iOS Blue */
+  --success: #30D158;
+  /* iOS Green */
+  --danger: #FF453A;
+  /* iOS Red */
+  --warning: #FFD60A;
+  /* iOS Yellow */
+
+  /* Layout */
+  --safe-bottom: env(safe-area-inset-bottom, 20px);
+  --radius-md: 20px;
+
+  /* Z-INDEX */
+  --z-nav: 50;
+  --z-modal-backdrop: 100;
+  --z-modal-sheet: 110;
+  --z-toast: 200;
+}
+
+/* --- LIGHT MODE --- */
+[data-theme="light"] {
+  --app-bg: #F2F2F7;
+  --glass-nav: rgba(255, 255, 255, 0.85);
+  --glass-card: rgba(255, 255, 255, 0.75);
+  --glass-modal: rgba(255, 255, 255, 0.95);
+  --glass-input: rgba(255, 255, 255, 0.6);
+  --glass-pill: rgba(120, 120, 128, 0.16);
+
+  --glass-border: transparent;
+  --glass-shine: rgba(255, 255, 255, 0.5);
+
+  --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.05), 0 12px 32px rgba(0, 0, 0, 0.08);
+  --shadow-float: 0 10px 20px rgba(0, 0, 0, 0.1), 0 30px 60px rgba(0, 0, 0, 0.12);
+  --shadow-text: none;
+
+  --key-bg: #FFFFFF;
+  --key-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  --key-inset: inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+
+  --text-main: #000000;
+  --text-muted: #86868B;
+  --primary: #007AFF;
+}
+
+/* =========================================
+   2. GLOBAL RESET & SHELL
+   ========================================= */
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background-color: var(--app-bg);
+  color: var(--text-main);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", Roboto, sans-serif;
+  transition: background-color 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.app-shell {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: var(--app-bg);
+}
+
+/* PC View - Clean Floating Layout */
+@media (min-width: 600px) {
+  .app-shell {
+    max-width: 420px;
+    height: 92vh;
+    margin: 4vh auto;
+    border-radius: 46px;
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+  }
+}
+
+/* =========================================
+   3. NAVIGATION
+   ========================================= */
+.glass-navbar {
+  height: 64px;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  background: var(--glass-nav);
+  backdrop-filter: var(--glass-frosted);
+  -webkit-backdrop-filter: var(--glass-frosted);
+  border-bottom: 1px solid var(--glass-border);
+  z-index: var(--z-nav);
+  transition: all 0.3s ease;
+}
+
+[data-theme="light"] .glass-navbar {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--text-main);
+  font-weight: 700;
+  font-size: 1.2rem;
+  letter-spacing: -0.6px;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Sync Badge */
+.sync-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  background: var(--glass-input);
+  border: 1px solid var(--glass-border);
+}
+
+.sync-badge.online {
+  color: var(--success);
+}
+
+.sync-badge.offline {
+  color: var(--danger);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* =========================================
+   4. SCORER LAYOUT & BALLS
+   ========================================= */
+.scorer-layout {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.hero-score {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 140px;
+  background: radial-gradient(circle at center, var(--glass-shine) 0%, transparent 60%);
+}
+
+.big-score {
+  font-size: 5rem;
+  font-weight: 800;
+  letter-spacing: -3px;
+  line-height: 1;
+  margin: 12px 0;
+  text-shadow: var(--shadow-text);
+}
+
+.score-sub {
+  font-size: 1rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* BALL STRIP - Floating Pill Style */
+.ball-strip {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 24px;
+  margin-bottom: 10px;
+  background: transparent;
+  overflow-x: auto;
+  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+}
+
+.ball-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.ball {
+  flex: 0 0 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--glass-card);
+  border: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.9rem !important;
+  color: var(--text-main);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .ball {
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* --- FIXED: DISTINCT COLORS (IMPORTANT added) --- */
+
+/* 4 = ELECTRIC BLUE */
+.ball.four {
+  background: linear-gradient(135deg, #0A84FF 0%, #0055FF 100%) !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 4px 15px rgba(10, 132, 255, 0.4) !important;
+}
+
+/* 6 = SUNSET GOLD */
+.ball.six {
+  background: linear-gradient(135deg, #FFD60A 0%, #FF9F0A 100%) !important;
+  color: #000 !important;
+  /* Black text on Gold for readability */
+  border: none !important;
+  box-shadow: 0 4px 15px rgba(255, 214, 10, 0.45) !important;
+}
+
+/* OUT = RED */
+.ball.out {
+  background: linear-gradient(135deg, #FF453A 0%, #d6332a 100%) !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 4px 15px rgba(255, 69, 58, 0.4) !important;
+}
+
+.ball.dots {
+  border: 2px dashed var(--text-muted);
+  background: transparent;
+  box-shadow: none;
+  opacity: 0.3;
+}
+
+.ball.wd,
+.ball.nb {
+  border-color: var(--warning);
+  color: var(--warning);
+  background: rgba(255, 214, 10, 0.1);
+}
+
+/* =========================================
+   5. KEYPAD & UNDO RESPONSIVENESS
+   ========================================= */
+.keypad {
+  flex-shrink: 0;
+  padding: 12px;
+  padding-bottom: calc(12px + var(--safe-bottom));
+  background: var(--glass-nav);
+  backdrop-filter: var(--glass-frosted);
+  -webkit-backdrop-filter: var(--glass-frosted);
+  border-top: 1px solid var(--glass-border);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  z-index: 10;
+}
+
+[data-theme="light"] .keypad {
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.key {
+  height: 60px;
+  border-radius: 16px;
+  border: none;
+  background: var(--key-bg);
+  box-shadow: var(--key-inset), var(--key-shadow);
+  color: var(--text-main);
+  font-size: 1.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.05s ease, background-color 0.1s;
+}
+
+.key:active {
+  transform: scale(0.95);
+  background: rgba(128, 128, 128, 0.15);
+}
+
+.key-wkt {
+  grid-column: span 2;
+  color: var(--danger);
+  background: rgba(255, 69, 58, 0.1);
+  font-weight: 700;
+}
+
+.key-wkt:active {
+  background: var(--danger);
+  color: #fff;
+}
+
+/* FIXED: RESPONSIVE UNDO BTN */
+.key-undo {
+  grid-column: span 2;
+  font-size: 1rem;
+  color: var(--text-muted);
+  background: transparent;
+  box-shadow: none;
+  border: 1px solid var(--glass-border);
+}
+
+[data-theme="light"] .key-undo {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Active state for Undo to give feedback */
+.key-undo:active {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-main);
+  border-color: var(--text-muted);
+  transform: scale(0.97);
+}
+
+/* =========================================
+   6. FORMS, TOGGLES & BUTTONS
+   ========================================= */
+.scroll-area,
+.wizard-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  padding-bottom: 120px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Glass Card */
+.glass-card {
+  background: var(--glass-card);
+  backdrop-filter: var(--glass-frosted);
+  -webkit-backdrop-filter: var(--glass-frosted);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 16px;
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-card);
+  transition: transform 0.2s;
+}
+
+.glass-card:active {
+  transform: scale(0.99);
+}
+
+/* Inputs */
+.input-group {
+  margin-bottom: 24px;
+}
+
+.input-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  margin-left: 4px;
+}
+
+.input-field {
+  width: 100%;
+  padding: 18px;
+  border-radius: 16px;
+  border: 1px solid transparent;
+  background: var(--glass-input);
+  box-shadow: inset 0 0 0 1px var(--glass-border);
+  color: var(--text-main);
+  font-size: 1.1rem;
+  outline: none;
+  transition: 0.2s;
+}
+
+.input-field:focus {
+  background: var(--glass-input);
+  box-shadow: inset 0 0 0 2px var(--primary);
+}
+
+/* --- TOGGLES (THE MISSING PIECE) --- */
+.toggle-row,
+.segmented-control {
+  display: flex;
+  background: var(--glass-pill);
+  padding: 4px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.toggle-opt,
+.segment-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toggle-opt.active,
+.segment-btn.active {
+  background: var(--glass-card);
+  color: var(--text-main);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12), 0 3px 1px rgba(0, 0, 0, 0.04);
+}
+
+/* Primary Button */
+.btn {
+  width: 100%;
+  padding: 18px;
+  border-radius: 16px;
+  border: none;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(10, 132, 255, 0.3);
+}
+
+/* Ghost Button (Flip Coin) */
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--glass-border);
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+[data-theme="light"] .btn-ghost {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.btn-ghost:active {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-main);
+}
+
+/* Icon Button */
+.btn-icon {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid transparent;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-icon:hover {
+  background: var(--glass-card);
+}
+
+/* VS Team Badge */
+.vs-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 20px 0;
+}
+
+.vs-team {
+  flex: 1;
+  text-align: center;
+  font-weight: 700;
+  color: var(--text-main);
+  font-size: 1.2rem;
+}
+
+.vs-badge {
+  background: var(--glass-input);
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  border: 1px solid var(--glass-border);
+}
+
+/* =========================================
+   7. MODALS & SHEETS
+   ========================================= */
+.modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
+  z-index: var(--z-modal-backdrop);
+  display: flex;
+  align-items: flex-end;
+  animation: fadeIn 0.2s;
+}
+
+.sheet {
+  width: 100%;
+  max-height: 90%;
+  background: var(--glass-modal);
+  backdrop-filter: var(--glass-frosted);
+  -webkit-backdrop-filter: var(--glass-frosted);
+  border-radius: 32px 32px 0 0;
+  padding: 32px;
+  padding-bottom: calc(40px + var(--safe-bottom));
+  box-shadow: var(--shadow-float);
+  border-top: 1px solid var(--glass-border);
+  display: flex;
+  flex-direction: column;
+  z-index: var(--z-modal-sheet);
+  animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow-y: auto;
+}
+
+[data-theme="light"] .sheet {
+  border-top: none;
+}
+
+/* =========================================
+   8. HEALTH SCORE BLOCKS
+   ========================================= */
+.sc-over-block {
+  padding: 20px;
+  background: var(--glass-card);
+  backdrop-filter: var(--glass-frosted);
+  border-radius: 20px;
+  margin-bottom: 16px;
+  border: 1px solid var(--glass-border);
+}
+
+[data-theme="light"] .sc-over-block {
+  border: none;
+  background: rgba(255, 255, 255, 0.65);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+.sc-over-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+[data-theme="light"] .sc-over-header {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.sc-ball-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* =========================================
+   9. ANIMATIONS & TOAST (FIXED)
+   ========================================= */
+
+/* TOAST: FLASH, WAIT, THEN FADE OUT */
+#toast {
+  position: absolute;
+  top: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  background: rgba(35, 35, 35, 0.95);
+  backdrop-filter: blur(20px);
+  padding: 12px 24px;
+  border-radius: 50px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: var(--z-toast);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+
+  /* THE FIX: Animation runs for 2.5s then disappears */
+  animation: toastFlash 2.5s forwards ease-in-out;
+
+  /* Start invisible so it doesn't block the screen */
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Light Mode Toast */
+[data-theme="light"] #toast {
+  background: rgba(255, 255, 255, 0.95);
+  color: #000;
+  border: none;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* Keyframes for the Toast: Appear -> Wait -> Disappear */
+@keyframes toastFlash {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.9) translateY(-20px);
+    pointer-events: none;
+  }
+
+  15% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1) translateY(0);
+    pointer-events: auto;
+  }
+
+  80% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1) translateY(0);
+    pointer-events: auto;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.95) translateY(-10px);
+    pointer-events: none;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* Coin */
+#coinContainer {
+  perspective: 800px;
+  width: 140px;
+  height: 140px;
+  margin: 30px auto;
+}
+
+#coin {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.coin-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.5rem;
+  letter-spacing: 1px;
+  border: 4px solid rgba(255, 255, 255, 0.8);
+  background: linear-gradient(135deg, #FFD700, #FDB931);
+  color: #8a6e00;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2), 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.coin-back {
+  transform: rotateX(180deg);
+  background: linear-gradient(135deg, #e0e0e0, #bdbdbd);
+  color: #555;
+  border-color: #999;
+}

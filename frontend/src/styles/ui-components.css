@@ -1,0 +1,654 @@
+/* =================================================================
+   MASTER UI COMPONENTS
+   (Includes: Navbar, Buttons, Modals, Auth, Light Mode Fixes)
+   ================================================================= */
+
+/* =========================================
+   1. COLLISION-PROOF NAVBAR
+   ========================================= */
+.glass-navbar {
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+
+    /* DARK MODE DEFAULT */
+    background: rgba(18, 18, 20, 0.85);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    transition: background 0.3s, border-color 0.3s;
+}
+
+/* LIGHT MODE NAVBAR */
+[data-theme="light"] .glass-navbar {
+    background: rgba(255, 255, 255, 0.85);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* LOGO */
+.nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: var(--text-main);
+    font-weight: 800;
+    font-size: 1.2rem;
+    letter-spacing: -0.5px;
+}
+
+.logo-icon {
+    font-size: 1.4rem;
+}
+
+/* ZONES */
+.nav-left,
+.nav-actions {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 20;
+}
+
+/* CENTER ZONE (Desktop: Absolute) */
+.nav-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    max-width: 50%;
+    width: auto;
+}
+
+/* MOBILE LAYOUT OVERRIDE (Static Flow) */
+@media (max-width: 480px) {
+    .nav-center {
+        position: static;
+        transform: none;
+        flex: 1;
+        margin: 0 8px;
+        max-width: none;
+    }
+
+    .match-capsule {
+        width: 100%;
+        padding: 6px 4px;
+        border: none;
+        background: transparent;
+    }
+
+    [data-theme="light"] .match-capsule {
+        background: transparent;
+        border: none;
+    }
+
+    .match-title {
+        justify-content: center;
+    }
+}
+
+/* MATCH CAPSULE */
+.match-capsule {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 6px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+
+[data-theme="light"] .match-capsule {
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.match-capsule:active {
+    transform: scale(0.96);
+}
+
+/* Typography */
+.match-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.match-title span {
+    max-width: 70px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vs-tag {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    opacity: 0.7;
+}
+
+/* Status */
+.match-status {
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 2px;
+}
+
+.match-status.live {
+    color: var(--success);
+}
+
+.match-status.finished {
+    color: var(--text-muted);
+}
+
+.status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+/* NAV BUTTONS */
+.nav-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.nav-btn:active {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="light"] .nav-btn:active {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+
+/* =========================================
+   2. BUTTONS & INPUTS
+   ========================================= */
+.btn {
+    width: 100%;
+    padding: 18px;
+    border-radius: 16px;
+    border: none;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(10, 132, 255, 0.3);
+}
+
+.btn-danger {
+    background: rgba(255, 69, 58, 0.15);
+    color: var(--danger);
+}
+
+/* FIXED GHOST BUTTON (Visible in Dark Mode) */
+.btn-ghost {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    padding: 16px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    /* Subtle fill */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-main);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-ghost:active {
+    background: rgba(255, 255, 255, 0.12);
+    transform: scale(0.98);
+}
+
+[data-theme="light"] .btn-ghost {
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    color: #000;
+}
+
+[data-theme="light"] .btn-ghost:active {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.btn-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+
+/* =========================================
+   3. MODALS, SHEETS & TOASTS
+   ========================================= */
+.modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(6px);
+    z-index: var(--z-modal-backdrop);
+    display: flex;
+    align-items: flex-end;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.sheet {
+    width: 100%;
+    max-height: 85%;
+    background: rgba(22, 22, 24, 0.92);
+    backdrop-filter: blur(28px) saturate(180%);
+    border-radius: 32px 32px 0 0;
+    padding: 32px;
+    padding-bottom: calc(40px + var(--safe-bottom));
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    z-index: var(--z-modal-sheet);
+    animation: slideUp 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+    overflow-y: auto;
+}
+
+[data-theme="light"] .sheet {
+    background: rgba(255, 255, 255, 0.98);
+    border-top: 1px solid rgba(0, 0, 0, 0.15);
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2), 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Handle Bar */
+.sheet::before {
+    content: "";
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+}
+
+[data-theme="light"] .sheet::before {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.sheet h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 10px 0 24px 0;
+    text-align: center;
+    color: var(--text-main);
+}
+
+/* TOAST */
+#toast {
+    position: absolute;
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(30, 30, 30, 0.95);
+    backdrop-filter: blur(20px);
+    padding: 12px 24px;
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 2000 !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+    animation: slideDownUp 1.9s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+[data-theme="light"] #toast {
+    background: rgba(255, 255, 255, 0.95);
+    color: #000;
+    border: none;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes slideDownUp {
+    0% {
+        opacity: 0;
+        top: 80px;
+        transform: translateX(-50%) scale(0.9);
+    }
+
+    15% {
+        opacity: 1;
+        top: 100px;
+        transform: translateX(-50%) scale(1);
+    }
+
+    85% {
+        opacity: 1;
+        top: 100px;
+        transform: translateX(-50%) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        top: 80px;
+        transform: translateX(-50%) scale(0.95);
+    }
+}
+
+
+/* =========================================
+   4. INPUTS & TOGGLES (Fixed for Light Mode)
+   ========================================= */
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-field {
+    width: 100%;
+    padding: 16px;
+    border-radius: 14px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    color: var(--text-main);
+    font-size: 1rem;
+    font-weight: 500;
+    outline: none;
+    transition: 0.2s;
+}
+
+.input-field:focus {
+    background: rgba(0, 0, 0, 0.4);
+    border-color: var(--primary);
+}
+
+[data-theme="light"] .input-field {
+    background: #FFFFFF;
+    border: 1px solid #E5E5EA;
+    color: #000;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .input-field:focus {
+    background: #FFFFFF;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.15);
+}
+
+/* TOGGLES */
+[data-theme="light"] .toggle-row {
+    background: rgba(118, 118, 128, 0.12);
+    border: none;
+}
+
+[data-theme="light"] .toggle-opt.active {
+    background: #FFFFFF;
+    color: #000;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+    border: 0.5px solid rgba(0, 0, 0, 0.04);
+}
+
+
+/* =========================================
+   5. AUTH PAGES (Login/Signup)
+   ========================================= */
+.auth-container {
+    min-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.4s ease-out;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+    padding: 40px 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+}
+
+.auth-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    background: rgba(99, 102, 241, 0.1);
+    box-shadow: 0 0 30px rgba(99, 102, 241, 0.15);
+    color: var(--primary);
+}
+
+.auth-icon.success {
+    background: rgba(16, 185, 129, 0.1);
+    box-shadow: 0 0 30px rgba(16, 185, 129, 0.15);
+    color: var(--success);
+}
+
+.auth-title {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.auth-desc {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-bottom: 32px;
+    max-width: 280px;
+}
+
+.auth-form {
+    width: 100%;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.auth-error {
+    background: rgba(255, 69, 58, 0.1);
+    color: var(--danger);
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-align: center;
+    border: 1px solid rgba(255, 69, 58, 0.2);
+}
+
+
+/* =========================================
+   6. CUSTOM MODALS (Victory / Danger)
+   ========================================= */
+.modal-danger-icon {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 69, 58, 0.15);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--danger);
+    margin-bottom: 16px;
+    box-shadow: 0 0 20px rgba(255, 69, 58, 0.2);
+}
+
+.modal-victory-icon {
+    width: 80px;
+    height: 80px;
+    background: radial-gradient(circle, rgba(255, 214, 10, 0.2), transparent 70%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFD60A;
+    margin-bottom: 20px;
+    animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.modal-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin: 0 0 8px 0;
+    color: var(--text-main);
+}
+
+.modal-desc {
+    font-size: 1rem;
+    color: var(--text-muted);
+    margin: 0 0 24px 0;
+    line-height: 1.5;
+}
+
+
+/* =========================================
+   7. KEYPAD & BALL COLORS (Light Mode Contrast)
+   ========================================= */
+[data-theme="light"] .key {
+    background: #FFFFFF;
+    color: #1c1c1e;
+    border: 1px solid #d1d1d6;
+    box-shadow: 0 2px 0 #8e8e93;
+}
+
+[data-theme="light"] .key:active {
+    background: #f2f2f7;
+    box-shadow: none;
+    transform: translateY(2px);
+}
+
+/* High Contrast Active States */
+[data-theme="light"] .key.active:nth-child(7) {
+    background: #007AFF;
+    color: #fff;
+    border-color: #0056b3;
+}
+
+/* WD */
+[data-theme="light"] .key.active:nth-child(8) {
+    background: #FF9500;
+    color: #fff;
+    border-color: #c47200;
+}
+
+/* NB */
+[data-theme="light"] .key.key-wkt.active {
+    background: #FF3B30;
+    color: #fff;
+    border-color: #c92a21;
+}
+
+/* WKT */
+
+/* Ball Strip Colors */
+[data-theme="light"] .ball {
+    background: #F2F2F7;
+    color: #1c1c1e;
+    border: 1px solid #d1d1d6;
+    font-weight: 700;
+}
+
+[data-theme="light"] .ball.four {
+    background: #34C759;
+    color: #fff;
+    border-color: #248a3d;
+}
+
+[data-theme="light"] .ball.six {
+    background: #AF52DE;
+    color: #fff;
+    border-color: #8034a8;
+}
+
+[data-theme="light"] .ball.out {
+    background: #FF3B30;
+    color: #fff;
+    border-color: #c92a21;
+}
+
+[data-theme="light"] .ball.wd {
+    background: #e0f2ff;
+    color: #007AFF;
+    border-color: #007AFF;
+}
+
+[data-theme="light"] .ball.nb {
+    background: #fff4e5;
+    color: #FF9500;
+    border-color: #FF9500;
+}

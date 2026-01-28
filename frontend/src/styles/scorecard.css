@@ -1,0 +1,415 @@
+/* =========================================
+   PART 3: SCORECARD ENGINE (scorecard.css)
+   ========================================= */
+
+/* --- 1. LAYOUT & HERO --- */
+.scorer-layout {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+
+.hero-score {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 140px;
+    background: radial-gradient(circle at center, var(--glass-shine) 0%, transparent 60%);
+}
+
+.big-score {
+    font-size: 5rem;
+    font-weight: 800;
+    letter-spacing: -3px;
+    line-height: 1;
+    margin: 12px 0;
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.score-sub {
+    font-size: 1rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* --- 2. MATCH SUMMARY CARD (Inside Scorecard Sheet) --- */
+.match-summary-card {
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 24px;
+    background: var(--glass-card);
+    backdrop-filter: var(--glass-frosted);
+    border-radius: 24px;
+    border: 1px solid var(--glass-border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: var(--shadow-card);
+}
+
+[data-theme="light"] .match-summary-card {
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), 0 12px 30px rgba(0, 0, 0, 0.1);
+}
+
+.summary-team {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.summary-score {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: var(--primary);
+    margin: 6px 0;
+    line-height: 1;
+}
+
+.summary-overs {
+    font-size: 1.1rem;
+    color: var(--text-main);
+    font-weight: 600;
+    opacity: 0.8;
+}
+
+/* --- 3. BALL STRIP (Floating Pill) --- */
+.ball-strip {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 24px;
+    margin-bottom: 12px;
+    overflow-x: auto;
+    mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+}
+
+.ball-strip::-webkit-scrollbar {
+    display: none;
+}
+
+.ball {
+    flex: 0 0 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: var(--glass-card);
+    border: 1px solid var(--glass-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.9rem !important;
+    color: var(--text-main);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .ball {
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* --- 4. PREMIUM BALL COLORS --- */
+.ball.four {
+    background: linear-gradient(135deg, #0A84FF 0%, #0055FF 100%) !important;
+    color: #fff !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(10, 132, 255, 0.4) !important;
+}
+
+.ball.six {
+    background: linear-gradient(135deg, #FFD60A 0%, #FF9F0A 100%) !important;
+    color: #000 !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(255, 214, 10, 0.45) !important;
+}
+
+.ball.out {
+    background: linear-gradient(135deg, #FF453A 0%, #d6332a 100%) !important;
+    color: #fff !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(255, 69, 58, 0.4) !important;
+}
+
+.ball.dots {
+    border: 2px dashed var(--text-muted);
+    background: transparent;
+    opacity: 0.3;
+    box-shadow: none;
+}
+
+.ball.wd,
+.ball.nb {
+    border-color: var(--warning);
+    color: var(--warning);
+    background: rgba(255, 214, 10, 0.1);
+}
+
+/* --- 5. FLOATING KEYPAD DOCK (New) --- */
+.keypad {
+    /* Floating Dock Physics */
+    background: linear-gradient(to top, rgba(18, 18, 20, 0.88), rgba(28, 28, 30, 0.65));
+    backdrop-filter: blur(22px) saturate(160%);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+
+    /* Top Border Light */
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+
+    /* Deep Elevation */
+    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.6), 0 -2px 8px rgba(0, 0, 0, 0.4);
+
+    position: relative;
+    padding: 12px;
+    padding-bottom: calc(12px + var(--safe-bottom));
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    z-index: 50;
+}
+
+/* Light Mode Keypad */
+[data-theme="light"] .keypad {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.12), 0 -2px 6px rgba(0, 0, 0, 0.08);
+}
+
+/* Luxury Top Edge Highlight */
+.keypad::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 6%;
+    right: 6%;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.35), transparent);
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+/* --- 6. TACTILE GLASS KEYS (New) --- */
+.key {
+    height: 60px;
+    border-radius: 16px;
+
+    /* Glass Physics */
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+
+    /* Inner Light + Drop Shadow */
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 6px 14px rgba(0, 0, 0, 0.45);
+
+    color: var(--text-main);
+    font-size: 1.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.06s ease, box-shadow 0.06s ease, background 0.12s ease;
+}
+
+/* Pressed State */
+.key:active {
+    transform: translateY(2px) scale(0.97);
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* Light Mode Keys */
+[data-theme="light"] .key {
+    background: #FFFFFF;
+    border: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    color: #000;
+}
+
+[data-theme="light"] .key:active {
+    background: #F2F2F7;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+/* Special Keys */
+.key-wkt {
+    grid-column: span 2;
+    color: #fff;
+    font-weight: 700;
+    background: linear-gradient(135deg, rgba(255, 69, 58, 0.35), rgba(255, 69, 58, 0.15));
+    border: 1px solid rgba(255, 69, 58, 0.3);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 6px 18px rgba(255, 69, 58, 0.45);
+}
+
+.key.val-4 {
+    color: #fff;
+    background: linear-gradient(135deg, rgba(10, 132, 255, 0.35), rgba(10, 132, 255, 0.15));
+    border: 1px solid rgba(10, 132, 255, 0.3);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 6px 14px rgba(10, 132, 255, 0.45);
+}
+
+.key.val-6 {
+    color: #000;
+    background: linear-gradient(135deg, rgba(255, 214, 10, 0.35), rgba(255, 214, 10, 0.15));
+    border: 1px solid rgba(255, 214, 10, 0.3);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 6px 14px rgba(255, 214, 10, 0.45);
+}
+
+.key.active {
+    background: linear-gradient(180deg, rgba(10, 132, 255, 0.35), rgba(10, 132, 255, 0.15));
+    border: 1px solid rgba(10, 132, 255, 0.6);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 6px 18px rgba(10, 132, 255, 0.5);
+    color: #fff;
+}
+
+.key-undo {
+    grid-column: span 2;
+    font-size: 1rem;
+    color: var(--text-muted);
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    box-shadow: none;
+}
+
+[data-theme="light"] .key-undo {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* --- 7. ELEVATED SCORE BLOCKS (New) --- */
+.sc-over-block {
+    position: relative;
+    padding: 22px;
+    margin-bottom: 22px;
+    /* Increased separation */
+    background: var(--glass-card);
+    backdrop-filter: var(--glass-frosted);
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+
+    /* STRONG ELEVATION */
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.25);
+
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Top Highlight for definition */
+.sc-over-block::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 8%;
+    right: 8%;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.35), transparent);
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+[data-theme="light"] .sc-over-block {
+    border: none;
+    background: rgba(255, 255, 255, 0.65);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 16px 40px rgba(0, 0, 0, 0.12);
+}
+
+.sc-over-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+[data-theme="light"] .sc-over-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.sc-ball-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* Tone down inner ball shadows */
+.sc-over-block .ball {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+/* scorecard.css */
+
+/* --- BALL STRIP & BALLS --- */
+.ball-strip {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 24px;
+    margin-bottom: 12px;
+    overflow-x: auto;
+    /* Smooth Fade Edges */
+    mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+}
+
+.ball-strip::-webkit-scrollbar {
+    display: none;
+}
+
+/* THE FIX: Dynamic Text Sizing & Flex Column */
+.ball {
+    flex: 0 0 48px;
+    height: 48px;
+    border-radius: 50%;
+
+    /* Glassy Background */
+    background: var(--glass-card);
+    border: 1px solid var(--glass-border);
+
+    /* Centering */
+    display: flex;
+    flex-direction: column;
+    /* Stack text vertically if needed */
+    align-items: center;
+    justify-content: center;
+
+    /* Text Styling */
+    font-weight: 800;
+    color: var(--text-main);
+    line-height: 1;
+    text-align: center;
+
+    /* Default Size */
+    font-size: 0.9rem;
+
+    /* Shadow */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    transition: transform 0.1s;
+}
+
+/* Shrink text if it contains '+' (Like nb+2+W) */
+.ball:not(:empty) {
+    /* Use a clamp to prevent overflow */
+    font-size: clamp(0.5rem, 0.8rem, 0.9rem);
+}
+
+/* Specific styling for complex events */
+.ball span.sub {
+    font-size: 0.55rem;
+    opacity: 0.8;
+    margin-top: 2px;
+}
+
+[data-theme="light"] .ball {
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}

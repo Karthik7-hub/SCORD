@@ -1,0 +1,107 @@
+/* =========================================
+   PART 1: VARIABLES & RESET
+   ========================================= */
+:root {
+    /* --- DARK MODE (Default) --- */
+    --app-bg: #000000;
+
+    /* Glass Surfaces */
+    --glass-nav: rgba(20, 20, 20, 0.75);
+    --glass-card: rgba(28, 28, 30, 0.65);
+    --glass-modal: rgba(30, 30, 32, 0.85);
+    --glass-input: rgba(255, 255, 255, 0.1);
+    --glass-pill: rgba(118, 118, 128, 0.24);
+    --glass-frosted: blur(28px) saturate(180%);
+
+    /* Borders & Depth */
+    --glass-border: rgba(255, 255, 255, 0.12);
+    --glass-shine: rgba(255, 255, 255, 0.05);
+
+    /* Text & Colors */
+    --text-main: #FFFFFF;
+    --text-muted: #98989D;
+    --primary: #0A84FF;
+    --success: #30D158;
+    --danger: #FF453A;
+    --warning: #FFD60A;
+
+    /* Dimensions */
+    --safe-bottom: env(safe-area-inset-bottom, 20px);
+    --radius-md: 20px;
+
+    /* Z-INDEX (Crucial for End Match Buttons) */
+    --z-nav: 50;
+    --z-modal-backdrop: 100;
+    --z-modal-sheet: 110;
+    /* Buttons inside sheets need this */
+    --z-toast: 200;
+}
+
+/* --- LIGHT MODE --- */
+[data-theme="light"] {
+    --app-bg: #F2F2F7;
+    --glass-nav: rgba(255, 255, 255, 0.85);
+    --glass-card: rgba(255, 255, 255, 0.75);
+    --glass-modal: rgba(255, 255, 255, 0.95);
+    --glass-input: rgba(255, 255, 255, 0.6);
+    --glass-pill: rgba(120, 120, 128, 0.16);
+    --glass-border: transparent;
+    --glass-shine: rgba(255, 255, 255, 0.5);
+    --text-main: #000000;
+    --text-muted: #86868B;
+    --primary: #007AFF;
+}
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+}
+
+html,
+body,
+#root {
+    width: 100%;
+    height: 100dvh;
+    overflow: hidden;
+    background-color: var(--app-bg);
+    color: var(--text-main);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", Roboto, sans-serif;
+}
+
+.app-shell {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    background: var(--app-bg);
+    /* FIX: This ensures z-indexes work correctly */
+    z-index: 1;
+}
+
+/* THE MAGIC FIX: This texture makes glass visible */
+.app-shell::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 15% 50%, rgba(255, 255, 255, 0.08), transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(255, 255, 255, 0.08), transparent 25%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+@media (min-width: 600px) {
+    .app-shell {
+        max-width: 420px;
+        height: 92vh;
+        margin: 4vh auto;
+        border-radius: 46px;
+        border: 1px solid var(--glass-border);
+        box-shadow: 0 40px 100px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+    }
+}
