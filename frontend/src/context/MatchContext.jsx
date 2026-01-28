@@ -5,7 +5,8 @@ const MatchContext = createContext();
 
 // CONFIG: Change this to your live server URL when deploying
 // Tries to load from .env, falls back to localhost if missing
-const API_URL = process.env.APP_API_URL || 'http://localhost:5000/api';
+// --- FIX: USE VITE SYNTAX ---
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 // --- 1. INITIALIZER ---
 const init = () => {

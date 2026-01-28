@@ -2,8 +2,8 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext();
 
-// --- CONFIGURATION ---
-const API_URL = process.env.APP_API_URL || 'http://localhost:5000/api';
+// --- FIX: USE VITE SYNTAX ---
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
