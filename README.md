@@ -17,7 +17,7 @@ A modern, glassmorphic cricket scoring application featuring real-time server sy
 - **Undo Capability:** Full history tracking allows undoing the last ball.
 
 ## 🛠️ Tech Stack
-- **Frontend:** React.js, Context API, CSS3 (Glassmorphism).
+- **Frontend:** React.js, Context API, CSS (Glassmorphism).
 - **Backend:** Node.js, Express.js.
 - **Database:** MongoDB (Mongoose).
 - **Auth:** JWT (JSON Web Tokens).
@@ -68,7 +68,7 @@ npm install
 *Create a `.env` file in the `/client` folder:*
 
 ```env
-REACT_APP_API_URL=http://localhost:5000/api
+VITE_API_URL=http://localhost:5000/api
 
 ```
 
@@ -82,14 +82,26 @@ npm start
 ---
 
 ## 📷 Screenshots
-<img width="550" height="873" alt="Screenshot 2026-01-29 014411" src="https://github.com/user-attachments/assets/6cf00df0-870c-445e-8a48-d69086b54c5c" />
-
-<img width="641" height="870" alt="Screenshot 2026-01-29 014429" src="https://github.com/user-attachments/assets/cbd3b75d-a81c-4ae2-8d1b-8828ffe1e164" />
+<p align="center">
+  <img 
+    src="https://github.com/user-attachments/assets/470b0c3a-2da1-467c-80c6-355b596293b7"
+    width="280"
+    alt="Mobile Screenshot 1"
+  />
+  &nbsp;&nbsp;&nbsp;
+  <img 
+    src="https://github.com/user-attachments/assets/09a6668c-b301-4959-ac16-6b61ffeca4ab"
+    width="280"
+    alt="Mobile Screenshot 2"
+  />
+    &nbsp;&nbsp;&nbsp;
+  <img 
+    src="https://github.com/user-attachments/assets/75b12062-f36c-47cc-b145-bbec26a52613"
+    width="280"
+    alt="Mobile Screenshot 3"
+  />
+</p>
 
 ---
 
 Made with ❤️ by VANA KARTHIK 
-
-```
-
-```
