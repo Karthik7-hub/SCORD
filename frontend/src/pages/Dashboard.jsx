@@ -9,12 +9,15 @@ export default function Dashboard() {
 
     const [step, setStep] = useState(0);
     const [filter, setFilter] = useState('live');
+
+    // Default 10 overs, 10 wickets
     const [form, setForm] = useState({ t1: '', t2: '', ov: 10, wk: 10, extraVal: 1 });
+
     const [toss, setToss] = useState({ winner: 't1', choice: 'bat' });
     const [coinRot, setCoinRot] = useState(0);
 
     // NEW: State for the Custom Delete Modal
-    const [deleteModal, setDeleteModal] = useState(null); // Stores the ID to delete
+    const [deleteModal, setDeleteModal] = useState(null);
 
     // --- HANDLERS ---
     const handleFlip = () => {
@@ -30,6 +33,11 @@ export default function Dashboard() {
     const handleStart = () => {
         const finalT1 = form.t1.trim() || "Team A";
         const finalT2 = form.t2.trim() || "Team B";
+
+        // FIX: Ensure Ov/Wk are numbers. If empty string, default to 10.
+        const finalOv = Number(form.ov) || 10;
+        const finalWk = Number(form.wk) || 10;
+
         const batFirst = toss.winner === 't1'
             ? (toss.choice === 'bat' ? finalT1 : finalT2)
             : (toss.choice === 'bat' ? finalT2 : finalT1);
@@ -39,7 +47,12 @@ export default function Dashboard() {
         const tossResultText = `${tossWinnerName} elected to ${tossAction}`;
 
         createMatch({
-            id: Date.now(), ...form, t1: finalT1, t2: finalT2,
+            id: Date.now(),
+            ...form,
+            t1: finalT1,
+            t2: finalT2,
+            ov: finalOv, // Use the sanitized numbers
+            wk: finalWk,
             inn1: [], inn2: [], activeInn: 1,
             battingTeam: batFirst, bowlingTeam: batFirst === finalT1 ? finalT2 : finalT1,
             isDone: false,
@@ -50,13 +63,11 @@ export default function Dashboard() {
         navigate('/scorer');
     };
 
-    // 1. TRIGGER MODAL INSTEAD OF WINDOW.CONFIRM
     const confirmDelete = (e, id) => {
         e.stopPropagation();
         setDeleteModal(id);
     };
 
-    // 2. ACTUAL DELETE ACTION
     const performDelete = () => {
         if (deleteModal) {
             deleteMatch(deleteModal);
@@ -79,19 +90,33 @@ export default function Dashboard() {
                 <input className="input-field" placeholder="Team B" value={form.t2} onChange={e => setForm({ ...form, t2: e.target.value })} />
             </div>
 
-            {/* Overs & Wickets */}
+            {/* Overs & Wickets (FIXED) */}
             <div className="input-group" style={{ display: 'flex', gap: 12 }}>
                 <div style={{ flex: 1 }}>
                     <span className="input-label">Overs</span>
-                    <input type="number" className="input-field" value={form.ov} onChange={e => setForm({ ...form, ov: parseInt(e.target.value) || 1 })} />
+                    <input
+                        type="number"
+                        className="input-field"
+                        placeholder="10"
+                        value={form.ov}
+                        // Allow empty string to clear the box, otherwise parse int
+                        onChange={e => setForm({ ...form, ov: e.target.value === '' ? '' : parseInt(e.target.value) })}
+                    />
                 </div>
                 <div style={{ flex: 1 }}>
                     <span className="input-label">Wickets</span>
-                    <input type="number" className="input-field" value={form.wk} onChange={e => setForm({ ...form, wk: parseInt(e.target.value) || 1 })} />
+                    <input
+                        type="number"
+                        className="input-field"
+                        placeholder="10"
+                        value={form.wk}
+                        // Allow empty string here too
+                        onChange={e => setForm({ ...form, wk: e.target.value === '' ? '' : parseInt(e.target.value) })}
+                    />
                 </div>
             </div>
 
-            {/* --- THIS IS THE EXTRAS TOGGLE --- */}
+            {/* Extras Toggle */}
             <div className="input-group">
                 <span className="input-label">Wide/No Ball Runs</span>
                 <div className="toggle-row">
@@ -222,20 +247,16 @@ export default function Dashboard() {
 
             <button className="fab-btn" onClick={() => setStep(1)}><Plus size={32} /></button>
 
-            {/* --- NEW: CUSTOM DELETE MODAL --- */}
             {deleteModal && (
                 <div className="modal-overlay" style={{ zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <div className="glass-card" style={{ width: '85%', padding: 30, textAlign: 'center', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}>
-
                         <div style={{ display: 'flex', justifyContent: 'center' }}>
                             <div className="modal-danger-icon">
                                 <AlertTriangle size={32} />
                             </div>
                         </div>
-
                         <h3 className="modal-title">Delete Match?</h3>
                         <p className="modal-desc">This action cannot be undone. All scores and stats will be lost.</p>
-
                         <div style={{ display: 'flex', gap: 12 }}>
                             <button className="btn btn-ghost" onClick={() => setDeleteModal(null)}>Cancel</button>
                             <button className="btn btn-danger" onClick={performDelete}>Delete</button>
@@ -243,7 +264,6 @@ export default function Dashboard() {
                     </div>
                 </div>
             )}
-
         </div>
     );
 }
