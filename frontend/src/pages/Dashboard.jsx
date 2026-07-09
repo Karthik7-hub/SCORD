@@ -1,11 +1,21 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMatch } from '../context/MatchContext';
-import { Plus, ArrowLeft, RefreshCw, Trophy, Trash2, AlertTriangle } from 'lucide-react';
+import {
+    Plus, ArrowLeft, RefreshCw, Trophy, Trash2, AlertTriangle,
+    ArrowUpDown, X
+} from 'lucide-react';
 
 export default function Dashboard() {
     const navigate = useNavigate();
-    const { state, createMatch, setActive, deleteMatch, getStats } = useMatch();
+    const {
+        state,
+        createMatch,
+        setActive,
+        deleteMatch,
+        getStats,
+        searchQuery
+    } = useMatch();
 
     const [step, setStep] = useState(0);
     const [filter, setFilter] = useState('live');
@@ -16,8 +26,10 @@ export default function Dashboard() {
     const [toss, setToss] = useState({ winner: 't1', choice: 'bat' });
     const [coinRot, setCoinRot] = useState(0);
 
-    // NEW: State for the Custom Delete Modal
+    // Custom dialog states
     const [deleteModal, setDeleteModal] = useState(null);
+    const [sortBy, setSortBy] = useState('date_desc');
+    const [showSortDropdown, setShowSortDropdown] = useState(false);
 
     // --- HANDLERS ---
     const handleFlip = () => {
@@ -33,8 +45,6 @@ export default function Dashboard() {
     const handleStart = () => {
         const finalT1 = form.t1.trim() || "Team A";
         const finalT2 = form.t2.trim() || "Team B";
-
-        // FIX: Ensure Ov/Wk are numbers. If empty string, default to 10.
         const finalOv = Number(form.ov) || 10;
         const finalWk = Number(form.wk) || 10;
 
@@ -51,7 +61,7 @@ export default function Dashboard() {
             ...form,
             t1: finalT1,
             t2: finalT2,
-            ov: finalOv, // Use the sanitized numbers
+            ov: finalOv,
             wk: finalWk,
             inn1: [], inn2: [], activeInn: 1,
             battingTeam: batFirst, bowlingTeam: batFirst === finalT1 ? finalT2 : finalT1,
@@ -75,6 +85,11 @@ export default function Dashboard() {
         }
     };
 
+    const getMatchDateString = (match) => {
+        const date = match.createdAt ? new Date(match.createdAt) : new Date(match.id);
+        return date.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+    };
+
     // --- WIZARD: STEP 1 (DETAILS) ---
     if (step === 1) return (
         <div className="wizard-container">
@@ -83,14 +98,12 @@ export default function Dashboard() {
                 <h2 className="wizard-title">Match Details</h2>
             </div>
 
-            {/* Team Names */}
             <div className="input-group">
                 <span className="input-label">Teams</span>
                 <input className="input-field" placeholder="Team A" value={form.t1} onChange={e => setForm({ ...form, t1: e.target.value })} style={{ marginBottom: 12 }} />
                 <input className="input-field" placeholder="Team B" value={form.t2} onChange={e => setForm({ ...form, t2: e.target.value })} />
             </div>
 
-            {/* Overs & Wickets (FIXED) */}
             <div className="input-group" style={{ display: 'flex', gap: 12 }}>
                 <div style={{ flex: 1 }}>
                     <span className="input-label">Overs</span>
@@ -99,7 +112,6 @@ export default function Dashboard() {
                         className="input-field"
                         placeholder="10"
                         value={form.ov}
-                        // Allow empty string to clear the box, otherwise parse int
                         onChange={e => setForm({ ...form, ov: e.target.value === '' ? '' : parseInt(e.target.value) })}
                     />
                 </div>
@@ -110,13 +122,11 @@ export default function Dashboard() {
                         className="input-field"
                         placeholder="10"
                         value={form.wk}
-                        // Allow empty string here too
                         onChange={e => setForm({ ...form, wk: e.target.value === '' ? '' : parseInt(e.target.value) })}
                     />
                 </div>
             </div>
 
-            {/* Extras Toggle */}
             <div className="input-group">
                 <span className="input-label">Wide/No Ball Runs</span>
                 <div className="toggle-row">
@@ -178,36 +188,133 @@ export default function Dashboard() {
     );
 
     // --- DASHBOARD LIST ---
-    const filteredMatches = (state.matches || []).filter(m => {
-        if (filter === 'live') return !m.isDone;
-        if (filter === 'finished') return m.isDone;
-        return true;
-    }).slice().reverse();
+    const processedMatches = (state.matches || [])
+        .filter(m => {
+            if (filter === 'live') return !m.isDone;
+            if (filter === 'finished') return m.isDone;
+            return true;
+        })
+        .filter(m => {
+            if (!searchQuery.trim()) return true;
+            const query = searchQuery.toLowerCase();
+            return (
+                m.t1.toLowerCase().includes(query) ||
+                m.t2.toLowerCase().includes(query) ||
+                (m.result && m.result.toLowerCase().includes(query))
+            );
+        })
+        .sort((a, b) => {
+            if (sortBy === 'date_asc') {
+                return a.id - b.id;
+            }
+            if (sortBy === 'team_asc') {
+                return a.t1.localeCompare(b.t1);
+            }
+            if (sortBy === 'runs_desc') {
+                const sA1 = getStats(a.inn1, a.extraVal);
+                const sA2 = getStats(a.inn2, a.extraVal);
+                const maxRunsA = Math.max(sA1.r, sA2.r);
+
+                const sB1 = getStats(b.inn1, b.extraVal);
+                const sB2 = getStats(b.inn2, b.extraVal);
+                const maxRunsB = Math.max(sB1.r, sB2.r);
+                
+                return maxRunsB - maxRunsA;
+            }
+            return b.id - a.id;
+        });
 
     return (
         <div className="scroll-area">
 
-            <div style={{ marginBottom: 20 }}>
-                <div className="toggle-row" style={{ marginBottom: 0 }}>
+            {/* Controls row */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <div className="toggle-row" style={{ marginBottom: 0, flex: 1, marginRight: 12 }}>
                     <button className={`toggle-opt ${filter === 'live' ? 'active' : ''}`} onClick={() => setFilter('live')}>Live</button>
                     <button className={`toggle-opt ${filter === 'finished' ? 'active' : ''}`} onClick={() => setFilter('finished')}>History</button>
                 </div>
+                
+                {/* Custom Floating Sort Dropdown */}
+                <div style={{ position: 'relative' }}>
+                    <button className="nav-btn" onClick={() => setShowSortDropdown(!showSortDropdown)} style={{ padding: 10, background: showSortDropdown ? 'rgba(10, 132, 255, 0.1)' : 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: showSortDropdown ? 'var(--primary)' : 'var(--text-main)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <ArrowUpDown size={18} />
+                    </button>
+                    
+                    {showSortDropdown && (
+                        <>
+                            {/* Backdrop Click Catcher */}
+                            <div style={{ position: 'fixed', inset: 0, zIndex: 998 }} onClick={() => setShowSortDropdown(false)} />
+                            
+                            {/* Floating Dropdown Card */}
+                            <div style={{
+                                position: 'absolute',
+                                top: '100%',
+                                right: 0,
+                                marginTop: 8,
+                                width: 180,
+                                background: 'var(--glass-modal)',
+                                backdropFilter: 'var(--glass-frosted)',
+                                border: '1px solid var(--glass-border)',
+                                borderRadius: 16,
+                                padding: 8,
+                                boxShadow: 'var(--shadow-float)',
+                                zIndex: 999,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: 4
+                            }}>
+                                {[
+                                    { key: 'date_desc', label: 'Newest First' },
+                                    { key: 'date_asc', label: 'Oldest First' },
+                                    { key: 'team_asc', label: 'Team Name (A-Z)' },
+                                    { key: 'runs_desc', label: 'Highest Score First' }
+                                ].map(option => (
+                                    <button
+                                        key={option.key}
+                                        onClick={() => { setSortBy(option.key); setShowSortDropdown(false); }}
+                                        style={{
+                                            border: 'none',
+                                            background: sortBy === option.key ? 'rgba(10, 132, 255, 0.1)' : 'transparent',
+                                            color: sortBy === option.key ? 'var(--primary)' : 'var(--text-main)',
+                                            padding: '10px 12px',
+                                            borderRadius: 10,
+                                            fontSize: '0.85rem',
+                                            fontWeight: sortBy === option.key ? 700 : 500,
+                                            textAlign: 'left',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.15s ease',
+                                            width: '100%'
+                                        }}
+                                    >
+                                        {option.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </>
+                    )}
+                </div>
             </div>
 
-            {filteredMatches.length > 0 ? (
-                filteredMatches.map(m => {
+            {/* Match List */}
+            {processedMatches.length > 0 ? (
+                processedMatches.map(m => {
                     const s1 = getStats(m.inn1, m.extraVal);
                     const s2 = getStats(m.inn2, m.extraVal);
                     const team1Score = m.battingTeam === m.t1 ? s1 : s2;
                     const team2Score = m.battingTeam === m.t1 ? s2 : s1;
 
                     return (
-                        <div key={m.id} className="glass-card" onClick={() => { setActive(m.id); navigate('/scorer'); }} style={{ cursor: 'pointer' }}>
+                        <div key={m.id} className="glass-card" onClick={() => { setActive(m.id); navigate('/scorer'); }} style={{ cursor: 'pointer', marginBottom: 16 }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                                <span style={{ fontSize: '0.7rem', fontWeight: 800, padding: '4px 8px', borderRadius: 6, background: m.isDone ? 'var(--bg-input)' : 'rgba(16, 185, 129, 0.2)', color: m.isDone ? 'var(--text-muted)' : 'var(--success)' }}>
-                                    {m.isDone ? 'FINISHED' : 'LIVE'}
-                                </span>
-                                <button className="btn-icon" style={{ width: 36, height: 36, background: 'rgba(255, 69, 58, 0.1)', color: 'var(--danger)' }} onClick={(e) => confirmDelete(e, m.id)}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                    <span style={{ fontSize: '0.7rem', fontWeight: 800, padding: '4px 8px', borderRadius: 6, background: m.isDone ? 'rgba(255,255,255,0.06)' : 'rgba(16, 185, 129, 0.2)', color: m.isDone ? 'var(--text-muted)' : 'var(--success)' }}>
+                                        {m.isDone ? 'FINISHED' : 'LIVE'}
+                                    </span>
+                                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+                                        {getMatchDateString(m)}
+                                    </span>
+                                </div>
+                                <button className="btn-icon" style={{ width: 36, height: 36, background: 'rgba(255, 69, 58, 0.1)', color: 'var(--danger)', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={(e) => confirmDelete(e, m.id)}>
                                     <Trash2 size={18} />
                                 </button>
                             </div>
@@ -240,13 +347,16 @@ export default function Dashboard() {
             ) : (
                 <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)' }}>
                     <Trophy size={48} style={{ opacity: 0.2, marginBottom: 15 }} />
-                    <h3 style={{ margin: 0 }}>No Matches</h3>
-                    <p style={{ fontSize: '0.9rem', opacity: 0.7 }}>Tap + to start a new match</p>
+                    <h3 style={{ margin: 0 }}>No Matches Found</h3>
+                    <p style={{ fontSize: '0.9rem', opacity: 0.7 }}>
+                        {searchQuery ? "Try refining your search query" : "Tap + to start a new match"}
+                    </p>
                 </div>
             )}
 
             <button className="fab-btn" onClick={() => setStep(1)}><Plus size={32} /></button>
 
+            {/* Custom Delete Confirmation Modal */}
             {deleteModal && (
                 <div className="modal-overlay" style={{ zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <div className="glass-card" style={{ width: '85%', padding: 30, textAlign: 'center', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}>

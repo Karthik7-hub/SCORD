@@ -94,6 +94,8 @@ const reducer = (state, action) => {
 export const MatchProvider = ({ children }) => {
     const [state, dispatch] = useReducer(reducer, null, init);
     const [uiState, setUiState] = useState({ menu: false, scorecard: false });
+    const [searchQuery, setSearchQuery] = useState('');
+    const [showSearch, setShowSearch] = useState(false);
 
     // --- EFFECTS ---
     useEffect(() => {
@@ -325,7 +327,11 @@ export const MatchProvider = ({ children }) => {
             getLocalDbSize,
             exportBackup,
             importBackup,
-            checkBackupFile
+            checkBackupFile,
+            searchQuery,
+            setSearchQuery,
+            showSearch,
+            setShowSearch
         }}>
             {children}
         </MatchContext.Provider>

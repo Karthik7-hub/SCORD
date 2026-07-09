@@ -8,6 +8,15 @@ export const ThemeProvider = ({ children }) => {
     useEffect(() => {
         document.body.setAttribute('data-theme', theme);
         localStorage.setItem('app_theme', theme);
+
+        // Dynamically update PWA status bar theme-color meta tag
+        let metaThemeColor = document.querySelector('meta[name="theme-color"]');
+        if (!metaThemeColor) {
+            metaThemeColor = document.createElement('meta');
+            metaThemeColor.setAttribute('name', 'theme-color');
+            document.head.appendChild(metaThemeColor);
+        }
+        metaThemeColor.setAttribute('content', theme === 'dark' ? '#000000' : '#F2F2F7');
     }, [theme]);
 
     const toggleTheme = (newTheme) => setTheme(newTheme);
