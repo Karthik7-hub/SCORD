@@ -1,20 +1,20 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom'; // <--- IMPORT THIS
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import App from './App.jsx';
 import './index.css';
 import { MatchProvider } from './context/MatchContext';
 import { ThemeProvider } from './context/ThemeContext';
 
+const router = createBrowserRouter([{ path: '*', element: <App /> }]);
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter> {/* <--- WRAP EVERYTHING HERE */}
-      <MatchProvider>
-        <ThemeProvider>
-          <App />
-        </ThemeProvider>
-      </MatchProvider>
-    </BrowserRouter>
+    <MatchProvider>
+      <ThemeProvider>
+        <RouterProvider router={router} />
+      </ThemeProvider>
+    </MatchProvider>
   </React.StrictMode>,
 );
 

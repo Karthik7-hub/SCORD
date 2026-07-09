@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useBlocker } from 'react-router-dom';
 import { useMatch } from '../context/MatchContext';
 import { RotateCcw, X, CheckCircle, Trophy, Play, AlertTriangle, Eye, Home, List } from 'lucide-react';
 
@@ -23,6 +23,32 @@ export default function Scorer() {
     const [deliveryType, setDeliveryType] = useState(null);
     const [dismissed, setDismissed] = useState(false);
 
+    // NAVIGATION BLOCKER
+    const blocker = useBlocker(
+        ({ currentValue, nextLocation }) =>
+            match && !match.isDone && currentValue.pathname !== nextLocation.pathname
+    );
+
+    // --- DATA CALCULATIONS (Null-Safe for Hook Compliance) ---
+    const matchWickets = match?.wkts || 10;
+    const matchOvers = match?.ov || 10;
+    const activeInn = match?.activeInn || 1;
+    const innData = (activeInn === 1 ? match?.inn1 : match?.inn2) || [];
+    const stats = getStats(innData, match?.extraVal ?? 1);
+
+    // Defines who is batting RIGHT NOW
+    const batTeam = activeInn === 1 ? match?.battingTeam : match?.bowlingTeam;
+
+    let target = 0, need = 0;
+    const s1 = getStats(match?.inn1 || [], match?.extraVal ?? 1);
+    target = s1.r + 1;
+    if (activeInn === 2) need = target - stats.r;
+
+    // --- LOGIC: GAME STATE ---
+    const maxLegals = matchOvers * 6;
+    const isInningsComplete = stats.w >= matchWickets || stats.legal >= maxLegals;
+    const isMatchWon = activeInn === 2 && stats.r >= target;
+
     // --- SAFE LOAD ---
     useEffect(() => {
         if (!match) {
@@ -39,33 +65,9 @@ export default function Scorer() {
         setDismissed(false);
     }, [match?.inn1?.length, match?.inn2?.length]);
 
-    if (!match) return null;
-
-    // --- DATA CALCULATIONS ---
-    const matchWickets = match.wkts || 10;
-    const matchOvers = match.ov || 10;
-    const activeInn = match.activeInn || 1;
-    const innData = (activeInn === 1 ? match.inn1 : match.inn2) || [];
-    const stats = getStats(innData, match.extraVal ?? 1);
-
-    // Defines who is batting RIGHT NOW
-    const batTeam = activeInn === 1 ? match.battingTeam : match.bowlingTeam;
-
-    let target = 0, need = 0;
-    if (activeInn === 2 || (match.inn2 && match.inn2.length > 0)) {
-        const s1 = getStats(match.inn1 || [], match.extraVal ?? 1);
-        target = s1.r + 1;
-        if (activeInn === 2) need = target - stats.r;
-    }
-
-    // --- LOGIC: GAME STATE ---
-    const maxLegals = matchOvers * 6;
-    const isInningsComplete = stats.w >= matchWickets || stats.legal >= maxLegals;
-    const isMatchWon = activeInn === 2 && stats.r >= target;
-
     // --- AUTOMATION (FIXED) ---
     useEffect(() => {
-        if (match.isDone || dismissed) return;
+        if (!match || match.isDone || dismissed) return;
 
         if (activeInn === 2) {
             if (isMatchWon) {
@@ -80,7 +82,9 @@ export default function Scorer() {
                 }
             }
         }
-    }, [stats, activeInn, match.isDone, dismissed, isInningsComplete, isMatchWon]);
+    }, [stats, activeInn, match?.isDone, dismissed, isInningsComplete, isMatchWon, endMatch, match?.bowlingTeam, match?.battingTeam, matchWickets, target, need]);
+
+    if (!match) return null;
 
     // --- HANDLERS ---
     const handleInput = (runs) => {
@@ -301,6 +305,20 @@ export default function Scorer() {
                         <div style={{ display: 'flex', gap: 10 }}>
                             <button className="btn btn-ghost" onClick={() => setConfirm(null)}>Cancel</button>
                             <button className="btn btn-danger" onClick={confirm.action}>Confirm</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {blocker.state === 'blocked' && (
+                <div className="modal-overlay" style={{ zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(10px)' }}>
+                    <div className="glass-card" style={{ width: '80%', padding: 25, textAlign: 'center', border: '1px solid rgba(255, 69, 58, 0.3)', boxShadow: '0 0 50px rgba(255, 69, 58, 0.1)' }}>
+                        <div style={{ marginBottom: 15, color: 'var(--danger)', display: 'flex', justifyContent: 'center' }}><AlertTriangle size={40} /></div>
+                        <h3 style={{ margin: '0 0 10px 0', fontSize: '1.4rem' }}>Exit Scorecard?</h3>
+                        <p style={{ color: 'var(--text-muted)', marginBottom: 20, fontSize: '0.9rem', lineHeight: '1.4' }}>Are you sure you want to leave this active match? Your current progress is saved, but you will leave the scorer screen.</p>
+                        <div style={{ display: 'flex', gap: 10 }}>
+                            <button className="btn btn-ghost" onClick={() => blocker.reset()}>Cancel</button>
+                            <button className="btn btn-danger" onClick={() => blocker.proceed()}>Confirm</button>
                         </div>
                     </div>
                 </div>

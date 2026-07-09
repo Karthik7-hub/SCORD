@@ -80,7 +80,13 @@ const Navbar = () => {
                         {/* --- LEFT: Logo or Back --- */}
                         <div className="nav-left">
                             {isScorerMode ? (
-                                <button className="nav-btn" onClick={() => navigate('/')}>
+                                <button className="nav-btn" onClick={() => {
+                                    if (window.history.state && window.history.state.idx > 0) {
+                                        navigate(-1);
+                                    } else {
+                                        navigate('/', { replace: true });
+                                    }
+                                }}>
                                     <ChevronLeft size={24} />
                                 </button>
                             ) : (

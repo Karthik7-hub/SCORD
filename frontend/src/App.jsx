@@ -1,5 +1,5 @@
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import React, { useEffect, useRef } from 'react';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 
 // --- COMPONENTS ---
 import Navbar from './components/Navbar';
@@ -10,6 +10,25 @@ import Scorer from './pages/Scorer';
 import BackupManager from './pages/BackupManager';
 
 export default function App() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isBootstrapped = useRef(false);
+
+  useEffect(() => {
+    if (isBootstrapped.current) return;
+    isBootstrapped.current = true;
+
+    const isRoot = location.pathname === '/';
+    const state = window.history.state;
+    const isDirectLaunch = !state || state.idx === 0 || (state.usr && state.usr.idx === 0);
+
+    if (!isRoot && isDirectLaunch) {
+      const subRoute = location.pathname + location.search;
+      navigate('/', { replace: true });
+      navigate(subRoute);
+    }
+  }, [location.pathname, location.search, navigate]);
+
   return (
     <div className="app-shell">
 

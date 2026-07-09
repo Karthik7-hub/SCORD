@@ -110,7 +110,13 @@ export default function BackupManager() {
         }}>
             {/* Header */}
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '24px', gap: '12px' }}>
-                <button className="nav-btn" onClick={() => navigate('/')} style={{ padding: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '50%', color: 'var(--text-main)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                <button className="nav-btn" onClick={() => {
+                    if (window.history.state && window.history.state.idx > 0) {
+                        navigate(-1);
+                    } else {
+                        navigate('/', { replace: true });
+                    }
+                }} style={{ padding: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '50%', color: 'var(--text-main)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                     <ChevronLeft size={20} />
                 </button>
                 <h1 style={{ fontSize: '1.6rem', fontWeight: 800, margin: 0, color: 'var(--text-main)' }}>Storage & Backups</h1>
