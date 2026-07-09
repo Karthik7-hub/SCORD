@@ -1,23 +1,20 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import SyncStatus from './SyncStatus';
 import { useMatch } from '../context/MatchContext';
 import { useTheme } from '../context/ThemeContext';
-import { useAuth } from '../context/AuthContext';
 import {
-    ChevronLeft, SlidersHorizontal, BarChart3, Settings,
-    LogIn, User, Server, ChevronRight, X
+    ChevronLeft, SlidersHorizontal, Settings, X, Database, ChevronRight
 } from 'lucide-react';
-
-// Import the CSS we just created
-// import '../styles/navbar.css'; 
 
 const Navbar = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { match, toggleMenu, toggleScorecard } = useMatch();
+    const {
+        match,
+        toggleMenu,
+        toggleScorecard
+    } = useMatch();
     const { theme, toggleTheme } = useTheme();
-    const { user, logout } = useAuth();
 
     const [showGlobalSettings, setShowGlobalSettings] = useState(false);
 
@@ -36,30 +33,25 @@ const Navbar = () => {
                         </button>
                     ) : (
                         <Link to="/" className="nav-logo">
-                            {/* SVG ICON REPLACING THE EMOJI */}
                             <svg width="28" height="28" viewBox="0 0 512 512" fill="none" style={{ marginRight: 8 }}>
                                 <rect width="512" height="512" rx="120" fill="#3B82F6" />
                                 <path d="M 316 136 C 226 136, 196 196, 256 256 C 316 316, 286 376, 196 376"
                                     stroke="white" strokeWidth="60" strokeLinecap="round" />
                             </svg>
-
                             <span className="logo-text">SCORD</span>
                         </Link>
                     )}
                 </div>
 
-                {/* --- CENTER: MATCH CAPSULE (The Fix) --- */}
+                {/* --- CENTER: MATCH CAPSULE --- */}
                 {isScorerMode && match && (
                     <div className="nav-center">
                         <div className="match-capsule" onClick={() => toggleScorecard(true)}>
-                            {/* Team Names */}
                             <div className="match-title">
                                 <span>{match.t1}</span>
                                 <span className="vs-tag">VS</span>
                                 <span>{match.t2}</span>
                             </div>
-
-                            {/* Status Dot */}
                             <div className={`match-status ${match.isDone ? 'finished' : 'live'}`}>
                                 <div className="status-dot"></div>
                                 <span>{match.isDone ? 'FINISHED' : 'LIVE'}</span>
@@ -70,24 +62,14 @@ const Navbar = () => {
 
                 {/* --- RIGHT: Actions --- */}
                 <div className="nav-actions">
-
-                    {/* Sync Indicator */}
-                    <SyncStatus />
-
                     {isScorerMode ? (
-                        <>
-                            {/* Scorer Specific Icons */}
-                            <button className="nav-btn" onClick={() => toggleMenu(true)}>
-                                <SlidersHorizontal size={20} />
-                            </button>
-                        </>
+                        <button className="nav-btn" onClick={() => toggleMenu(true)}>
+                            <SlidersHorizontal size={20} />
+                        </button>
                     ) : (
-                        <>
-                            {/* Dashboard Settings */}
-                            <button className="nav-btn" onClick={() => setShowGlobalSettings(true)}>
-                                <Settings size={20} />
-                            </button>
-                        </>
+                        <button className="nav-btn" onClick={() => setShowGlobalSettings(true)}>
+                            <Settings size={20} />
+                        </button>
                     )}
                 </div>
             </nav>
@@ -110,23 +92,16 @@ const Navbar = () => {
                             </div>
                         </div>
 
-                        {/* Account Management */}
-                        <button className="btn-action" onClick={() => { setShowGlobalSettings(false); navigate('/login'); }}>
+                        {/* Backup / Restore Navigation */}
+                        <button className="btn-action" onClick={() => { setShowGlobalSettings(false); navigate('/data'); }} style={{ marginTop: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                {user ? <User size={20} color="var(--primary)" /> : <LogIn size={20} color="var(--text-muted)" />}
-                                <span>{user ? 'Manage Account' : 'Log In / Sign Up'}</span>
+                                <Database size={20} color="var(--primary)" />
+                                <span>Backup</span>
                             </div>
                             <ChevronRight size={20} color="var(--text-muted)" />
                         </button>
 
-                        {/* Logout */}
-                        {user && (
-                            <button className="btn btn-danger" style={{ marginTop: 10 }} onClick={() => { logout(); setShowGlobalSettings(false); }}>
-                                Log Out
-                            </button>
-                        )}
-
-                        <div style={{ marginTop: 20, textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)', opacity: 0.5 }}>
+                        <div style={{ marginTop: 24, textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)', opacity: 0.5 }}>
                             Scord v1.0
                         </div>
                     </div>

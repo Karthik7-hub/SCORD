@@ -1,10 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-
-// --- CONTEXT PROVIDERS ---
-import { AuthProvider } from './context/AuthContext';
-import { ThemeProvider } from './context/ThemeContext';
-import { MatchProvider } from './context/MatchContext';
+import { Routes, Route, Navigate } from 'react-router-dom';
 
 // --- COMPONENTS ---
 import Navbar from './components/Navbar';
@@ -12,35 +7,26 @@ import Navbar from './components/Navbar';
 // --- PAGES ---
 import Dashboard from './pages/Dashboard';
 import Scorer from './pages/Scorer';
-import Login from './pages/Login'; // See code below if you don't have this
+import BackupManager from './pages/BackupManager';
 
 export default function App() {
   return (
-    <AuthProvider>
-      <ThemeProvider>
-        <MatchProvider>
+    <div className="app-shell">
 
-          {/* THE MAIN CONTAINER (Handles the Flex Layout) */}
-          <div className="app-shell">
+      {/* 1. NAVBAR (Fixed at Top) */}
+      <Navbar />
 
-            {/* 1. NAVBAR (Fixed at Top) */}
-            <Navbar />
+      {/* 2. CONTENT AREA (Grows to fill space) */}
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/scorer" element={<Scorer />} />
+        <Route path="/data" element={<BackupManager />} />
+        <Route path="/login" element={<Navigate to="/data" replace />} />
 
-            {/* 2. CONTENT AREA (Grows to fill space) */}
-            {/* The pages (Dashboard/Scorer) have 'flex: 1' to fill the remaining height */}
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/scorer" element={<Scorer />} />
-              <Route path="/login" element={<Login />} />
+        {/* Fallback route */}
+        <Route path="*" element={<Dashboard />} />
+      </Routes>
 
-              {/* Fallback route */}
-              <Route path="*" element={<Dashboard />} />
-            </Routes>
-
-          </div>
-
-        </MatchProvider>
-      </ThemeProvider>
-    </AuthProvider>
+    </div>
   );
 }

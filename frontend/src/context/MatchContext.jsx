@@ -1,12 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
-import { useAuth } from './AuthContext';
 
 const MatchContext = createContext();
-
-// CONFIG: Change this to your live server URL when deploying
-// Tries to load from .env, falls back to localhost if missing
-// --- FIX: USE VITE SYNTAX ---
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 // --- 1. INITIALIZER ---
 const init = () => {
@@ -33,8 +27,8 @@ const reducer = (state, action) => {
             return {
                 ...state,
                 matches: action.payload.matches,
-                dataMode: action.payload.mode,
-                activeId: action.payload.mode === 'user' ? state.activeId : (state.activeId || null)
+                dataMode: 'guest',
+                activeId: action.payload.activeId !== undefined ? action.payload.activeId : state.activeId
             };
 
         case 'WIPE_DATA':
@@ -98,98 +92,159 @@ const reducer = (state, action) => {
 
 // --- 3. PROVIDER ---
 export const MatchProvider = ({ children }) => {
-    const { user } = useAuth();
     const [state, dispatch] = useReducer(reducer, null, init);
     const [uiState, setUiState] = useState({ menu: false, scorecard: false });
-    const [syncStatus, setSyncStatus] = useState('online');
-    const [pendingQueue, setPendingQueue] = useState(() => {
-        const saved = localStorage.getItem('cricket_pro_sync_queue');
-        return saved ? JSON.parse(saved) : [];
-    });
 
     // --- EFFECTS ---
     useEffect(() => {
-        if (state.activeId) localStorage.setItem('cricket_pro_active_id', state.activeId);
+        if (state && state.activeId) localStorage.setItem('cricket_pro_active_id', state.activeId);
         else localStorage.removeItem('cricket_pro_active_id');
-    }, [state.activeId]);
+    }, [state?.activeId]);
 
     useEffect(() => {
-        if (state.dataMode === 'guest') {
+        if (state) {
             localStorage.setItem('cricket_pro_db_v2', JSON.stringify({ matches: state.matches }));
         }
-    }, [state.matches, state.dataMode]);
+    }, [state?.matches]);
 
-    useEffect(() => {
-        localStorage.setItem('cricket_pro_sync_queue', JSON.stringify(pendingQueue));
-    }, [pendingQueue]);
-
-    // --- SYNC ENGINE ---
-    const syncToServer = async (endpoint, method, body) => {
-        if (!user) return;
-        const request = { id: Date.now(), endpoint, method, body };
-
-        if (syncStatus === 'offline') {
-            setPendingQueue(prev => [...prev, request]);
-            return;
-        }
-
-        try {
-            setSyncStatus('syncing');
-            const res = await fetch(`${API_URL}/${endpoint}`, {
-                method: method,
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${user.token}` },
-                body: JSON.stringify(body)
-            });
-            if (!res.ok) throw new Error("Server Error");
-            setSyncStatus('online');
-        } catch (err) {
-            console.error("Sync Failed, Queueing...", err);
-            setSyncStatus('offline');
-            setPendingQueue(prev => [...prev, request]);
-        }
+    // --- HELPER UTILITIES ---
+    const getLocalDbSize = () => {
+        let totalBytes = 0;
+        const keys = ['cricket_pro_db_v2', 'cricket_pro_active_id'];
+        keys.forEach(key => {
+            const val = localStorage.getItem(key);
+            if (val) {
+                totalBytes += val.length * 2;
+            }
+        });
+        if (totalBytes === 0) return '0 KB';
+        if (totalBytes < 1024) return `${totalBytes} B`;
+        if (totalBytes < 1024 * 1024) return `${(totalBytes / 1024).toFixed(2)} KB`;
+        return `${(totalBytes / (1024 * 1024)).toFixed(2)} MB`;
     };
 
-    useEffect(() => {
-        if (pendingQueue.length === 0) {
-            if (syncStatus === 'offline') setSyncStatus('online');
-            return;
-        }
-        const processQueue = async () => {
-            const itemToSync = pendingQueue[0];
-            try {
-                const res = await fetch(`${API_URL}/${itemToSync.endpoint}`, {
-                    method: itemToSync.method,
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${user.token}` },
-                    body: JSON.stringify(itemToSync.body)
-                });
-                if (!res.ok) throw new Error("Retry Failed");
-                setPendingQueue(prev => prev.slice(1));
-                setSyncStatus('syncing');
-            } catch (err) {
-                setSyncStatus('offline');
-            }
+    const exportBackup = () => {
+        const matchesData = localStorage.getItem('cricket_pro_db_v2') || '{"matches":[]}';
+        const activeId = localStorage.getItem('cricket_pro_active_id') || 'null';
+        const backupData = {
+            version: 'scord-backup-v1',
+            timestamp: new Date().toISOString(),
+            matches: JSON.parse(matchesData).matches || [],
+            activeId: activeId !== 'null' ? parseInt(activeId) : null
         };
-        const interval = setInterval(processQueue, 3000);
-        return () => clearInterval(interval);
-    }, [pendingQueue, user, syncStatus]);
+        const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const dateStr = new Date().toISOString().slice(0, 10);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `scord-backup-${dateStr}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
 
-    useEffect(() => {
-        if (user) {
-            fetch(`${API_URL}/matches`, { headers: { 'Authorization': `Bearer ${user.token}` } })
-                .then(res => res.json())
-                .then(data => dispatch({ type: 'SET_DATA', payload: { matches: data, mode: 'user' } }))
-                .catch(() => setSyncStatus('offline'));
-        } else {
-            const saved = localStorage.getItem('cricket_pro_db_v2');
-            const parsed = saved ? JSON.parse(saved) : { matches: [] };
-            dispatch({ type: 'SET_DATA', payload: { matches: parsed.matches || [], mode: 'guest' } });
-        }
-    }, [user]);
+    const checkBackupFile = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    if (!data || !Array.isArray(data.matches)) {
+                        throw new Error("Invalid backup format: 'matches' must be an array.");
+                    }
+                    const localData = JSON.parse(localStorage.getItem('cricket_pro_db_v2') || '{"matches":[]}');
+                    const localMatches = localData.matches || [];
+                    const localIds = new Set(localMatches.map(m => m.id));
+                    
+                    let conflictsCount = 0;
+                    data.matches.forEach(m => {
+                        if (localIds.has(m.id)) {
+                            conflictsCount++;
+                        }
+                    });
+                    
+                    resolve({
+                        valid: true,
+                        matchesCount: data.matches.length,
+                        conflictsCount,
+                        newCount: data.matches.length - conflictsCount,
+                        data
+                    });
+                } catch (err) {
+                    reject(err);
+                }
+            };
+            reader.onerror = () => reject(new Error("File reading failed."));
+            reader.readAsText(file);
+        });
+    };
+
+    const importBackup = (file, strategy = 'merge') => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    if (!data || !Array.isArray(data.matches)) {
+                        throw new Error("Invalid backup format: 'matches' must be an array.");
+                    }
+                    
+                    const localData = JSON.parse(localStorage.getItem('cricket_pro_db_v2') || '{"matches":[]}');
+                    const localMatches = localData.matches || [];
+                    
+                    let finalMatches = [];
+                    let stats = { added: 0, updated: 0, replaced: 0 };
+                    
+                    if (strategy === 'replace') {
+                        finalMatches = data.matches;
+                        stats.replaced = data.matches.length;
+                    } else {
+                        // Merge strategy
+                        const localMap = new Map(localMatches.map(m => [m.id, m]));
+                        data.matches.forEach(importedMatch => {
+                            if (localMap.has(importedMatch.id)) {
+                                localMap.set(importedMatch.id, importedMatch);
+                                stats.updated++;
+                            } else {
+                                localMap.set(importedMatch.id, importedMatch);
+                                stats.added++;
+                            }
+                        });
+                        finalMatches = Array.from(localMap.values());
+                    }
+                    
+                    finalMatches.sort((a, b) => b.id - a.id);
+                    localStorage.setItem('cricket_pro_db_v2', JSON.stringify({ matches: finalMatches }));
+                    
+                    const activeId = strategy === 'replace' ? data.activeId : (localStorage.getItem('cricket_pro_active_id') || data.activeId);
+                    if (activeId) {
+                        localStorage.setItem('cricket_pro_active_id', activeId.toString());
+                    } else {
+                        localStorage.removeItem('cricket_pro_active_id');
+                    }
+                    
+                    dispatch({
+                        type: 'SET_DATA',
+                        payload: {
+                            matches: finalMatches,
+                            activeId: activeId ? parseInt(activeId) : null
+                        }
+                    });
+                    
+                    resolve({ success: true, stats, total: finalMatches.length });
+                } catch (err) {
+                    reject(err);
+                }
+            };
+            reader.onerror = () => reject(new Error("File reading failed."));
+            reader.readAsText(file);
+        });
+    };
 
     // --- ACTIONS ---
 
     const createMatch = (d) => {
-        // Prepare match object with defaults + Toss Result
         const newMatch = {
             ...d,
             inn1: d.inn1 || [],
@@ -197,69 +252,40 @@ export const MatchProvider = ({ children }) => {
             activeInn: d.activeInn || 1,
             isDone: false,
             result: "",
-            tossResult: d.tossResult || "" // <--- NEW: Ensures tossResult is stored
+            tossResult: d.tossResult || ""
         };
-
         dispatch({ type: 'CREATE_MATCH', payload: newMatch });
-        syncToServer('matches', 'POST', newMatch);
     };
 
     const deleteMatch = (id) => {
         dispatch({ type: 'DELETE_MATCH', payload: id });
-        syncToServer(`matches/${id}`, 'DELETE');
     };
 
     const updateMatch = (d) => {
         dispatch({ type: 'UPDATE_MATCH', payload: d });
-        syncToServer(`matches/${state.activeId}`, 'PATCH', d);
     };
 
     const addBall = (r, t, w) => {
         const ball = { id: Date.now(), runs: r, type: t || 'LEGAL', isWicket: !!w };
         dispatch({ type: 'ADD_BALL', payload: ball });
-        const currentMatch = state.matches.find(m => m.id === state.activeId);
-        if (user && currentMatch) {
-            const innKey = currentMatch.activeInn === 1 ? 'inn1' : 'inn2';
-            const updatedInnings = [...(currentMatch[innKey] || []), ball];
-            syncToServer(`matches/${state.activeId}`, 'PATCH', { [innKey]: updatedInnings });
-        }
     };
 
     const undo = () => {
-        const m = state.matches.find(m => m.id === state.activeId);
         dispatch({ type: 'UNDO' });
-        if (user && m) {
-            const key = m.activeInn === 1 ? 'inn1' : 'inn2';
-            const currentArr = m[key] || [];
-            if (m.activeInn === 2 && currentArr.length === 0) {
-                syncToServer(`matches/${state.activeId}`, 'PATCH', { activeInn: 1, isDone: false, result: null });
-                return;
-            }
-            if (currentArr.length === 0) {
-                syncToServer(`matches/${state.activeId}`, 'PATCH', { isDone: false, result: null });
-                return;
-            }
-            const updatedInnings = currentArr.slice(0, -1);
-            syncToServer(`matches/${state.activeId}`, 'PATCH', { [key]: updatedInnings, isDone: false, result: null });
-        }
     };
 
     const endInnings = () => {
         dispatch({ type: 'END_INN' });
-        syncToServer(`matches/${state.activeId}`, 'PATCH', { activeInn: 2 });
     };
 
     const endMatch = (res) => {
         dispatch({ type: 'FINISH', payload: res });
-        syncToServer(`matches/${state.activeId}`, 'PATCH', { isDone: true, result: res });
     };
 
     const wipeData = () => {
         dispatch({ type: 'WIPE_DATA' });
         localStorage.removeItem('cricket_pro_db_v2');
         localStorage.removeItem('cricket_pro_active_id');
-        localStorage.removeItem('cricket_pro_sync_queue');
-        setPendingQueue([]);
     };
 
     const getStats = (balls, extraVal) => {
@@ -283,7 +309,6 @@ export const MatchProvider = ({ children }) => {
         <MatchContext.Provider value={{
             state,
             match: activeMatch,
-            syncState: { status: syncStatus, pendingCount: pendingQueue.length },
             uiState,
             toggleMenu,
             toggleScorecard,
@@ -296,7 +321,11 @@ export const MatchProvider = ({ children }) => {
             endInnings,
             endMatch,
             getStats,
-            wipeData
+            wipeData,
+            getLocalDbSize,
+            exportBackup,
+            importBackup,
+            checkBackupFile
         }}>
             {children}
         </MatchContext.Provider>
