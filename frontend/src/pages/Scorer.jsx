@@ -25,8 +25,10 @@ export default function Scorer() {
 
     // NAVIGATION BLOCKER
     const blocker = useBlocker(
-        ({ currentValue, nextLocation }) =>
-            match && !match.isDone && currentValue.pathname !== nextLocation.pathname
+        ({ currentValue, nextLocation }) => {
+            if (window.__scord_bootstrapping) return false;
+            return match && !match.isDone && currentValue.pathname !== nextLocation.pathname;
+        }
     );
 
     // --- DATA CALCULATIONS (Null-Safe for Hook Compliance) ---

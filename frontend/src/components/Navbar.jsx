@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useMatch } from '../context/MatchContext';
 import { useTheme } from '../context/ThemeContext';
+import { useAppNavigation } from '../context/NavigationContext';
 import {
     ChevronLeft, SlidersHorizontal, Settings, X, Database, ChevronRight, Search
 } from 'lucide-react';
 
 const Navbar = () => {
-    const navigate = useNavigate();
+    const { goBack, push } = useAppNavigation();
     const location = useLocation();
     const {
         match,
@@ -80,13 +81,7 @@ const Navbar = () => {
                         {/* --- LEFT: Logo or Back --- */}
                         <div className="nav-left">
                             {isScorerMode ? (
-                                <button className="nav-btn" onClick={() => {
-                                    if (window.history.state && window.history.state.idx > 0) {
-                                        navigate(-1);
-                                    } else {
-                                        navigate('/', { replace: true });
-                                    }
-                                }}>
+                                <button className="nav-btn" onClick={goBack}>
                                     <ChevronLeft size={24} />
                                 </button>
                             ) : (
@@ -160,7 +155,7 @@ const Navbar = () => {
                         </div>
 
                         {/* Backup / Restore Navigation */}
-                        <button className="btn-action" onClick={() => { setShowGlobalSettings(false); navigate('/data'); }} style={{ marginTop: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                        <button className="btn-action" onClick={() => { setShowGlobalSettings(false); push('/data'); }} style={{ marginTop: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                                 <Database size={20} color="var(--primary)" />
                                 <span>Backup</span>

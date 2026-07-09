@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useMatch } from '../context/MatchContext';
+import { useAppNavigation } from '../context/NavigationContext';
 import {
     Database, Download, Upload, Trash2, ChevronLeft,
     CheckCircle2, AlertTriangle, RefreshCw, Layers
 } from 'lucide-react';
 
 export default function BackupManager() {
-    const navigate = useNavigate();
+    const { goBack } = useAppNavigation();
     const {
         state,
         getLocalDbSize,
@@ -110,13 +110,7 @@ export default function BackupManager() {
         }}>
             {/* Header */}
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '24px', gap: '12px' }}>
-                <button className="nav-btn" onClick={() => {
-                    if (window.history.state && window.history.state.idx > 0) {
-                        navigate(-1);
-                    } else {
-                        navigate('/', { replace: true });
-                    }
-                }} style={{ padding: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '50%', color: 'var(--text-main)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                <button className="nav-btn" onClick={goBack} style={{ padding: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '50%', color: 'var(--text-main)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                     <ChevronLeft size={20} />
                 </button>
                 <h1 style={{ fontSize: '1.6rem', fontWeight: 800, margin: 0, color: 'var(--text-main)' }}>Storage & Backups</h1>
